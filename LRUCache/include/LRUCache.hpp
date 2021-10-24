@@ -40,7 +40,15 @@ public:
     }
 
     [[nodiscard]] value_type get(key_type const& key) const noexcept {
-        return _moveKeyToFront(key) ? value_type{_orderedReferences.front().second} : std::nullopt;
+        size_type listSizeBefore = _orderedReferences.size();
+        size_type mapSizeBefore  = _idMap.size();
+        assert(listSizeBefore == mapSizeBefore);
+
+        auto res = _moveKeyToFront(key) ? value_type{_orderedReferences.front().second} : std::nullopt;
+
+        assert(_idMap.size() == mapSizeBefore);
+        assert(_orderedReferences.size() == listSizeBefore);
+        return res;
     }
 
     void put(key_type key, mapped_type value) {
@@ -53,10 +61,16 @@ public:
         if (_moveKeyToFront(key)) {
             _orderedReferences.front().second = std::move(value);
         } else {
+            assert(_orderedReferences.size() < _capacity);
+            assert(_orderedReferences.size() == _idMap.size());
+
             auto [iterator, _] = _idMap.emplace(std::move(key), _orderedReferences.end());
             _orderedReferences.emplace_front(iterator->first, std::move(value));
             iterator->second = _orderedReferences.begin();
         }
+
+        assert(!empty());
+        assert(size() > 0);
     }
 
     [[nodiscard]] size_type size() const noexcept { return _idMap.size(); }
