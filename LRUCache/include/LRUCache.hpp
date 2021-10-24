@@ -20,8 +20,7 @@ class LRUCache {
 public:
     using key_type        = Key;
     using mapped_type     = T;
-    using reference       = std::optional<key_type&>;
-    using const_reference = std::optional<key_type const&>;
+    using value_type      = std::optional<mapped_type>;
     using size_type       = std::size_t;
     using difference_type = std::ptrdiff_t;
     using hasher          = Hash;
@@ -33,12 +32,15 @@ public:
         assert(_capacity > 0);
     }
 
-    [[nodiscard]] const_reference get(key_type const& key) const noexcept {
-        return _moveKeyToFront(key) ? _orderedReferences.front().second : std::nullopt;
+    template <class InputIt>
+    LRUCache(InputIt first, InputIt last, size_type capacity = DefaultCacheCapacity) : LRUCache{capacity} {
+        for (; first != last; ++first) {
+            put(first->first, first->second);
+        }
     }
 
-    [[nodiscard]] reference get(key_type const& key) noexcept {
-        return _moveKeyToFront(key) ? _orderedReferences.front().second : std::nullopt;
+    [[nodiscard]] value_type get(key_type const& key) const noexcept {
+        return _moveKeyToFront(key) ? value_type{_orderedReferences.front().second} : std::nullopt;
     }
 
     void put(key_type key, mapped_type value) {
@@ -49,7 +51,7 @@ public:
         }
 
         if (_moveKeyToFront(key)) {
-            _idMap[key] = std::move(value);
+            _orderedReferences.front().second = std::move(value);
         } else {
             auto [iterator, _] = _idMap.emplace(std::move(key), _orderedReferences.end());
             _orderedReferences.emplace_front(iterator->first, std::move(value));
