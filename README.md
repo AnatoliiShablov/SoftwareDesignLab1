@@ -7,7 +7,8 @@ pip install conan
 ```
 #### Установка с сайта:
 
-[conan]("https://conan.io/downloads.html")
+
+[conan](https://conan.io/downloads.html)
 
 ### Linux CLI
 
