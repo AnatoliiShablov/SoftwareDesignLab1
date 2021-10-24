@@ -13,7 +13,7 @@ pip install conan
 ### Linux CLI
 
 ```
-cmake -S. -Bbuild
+cmake -DCMAKE_BUILD_TYPE=Release -S. -Bbuild
 cmake --build build
 ```
 
